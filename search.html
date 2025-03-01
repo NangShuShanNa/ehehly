@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .product { padding: 10px; border-bottom: 1px solid #ddd; display: flex; align-items: center; }
+        .product img { width: 100px; height: 100px; object-fit: cover; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Search Results</h1>
+    <div id="results"></div>
+
+    <script>
+        // Fetch product data from JSON
+        async function fetchProducts() {
+            const response = await fetch("products.json");
+            return response.json();
+        }
+
+        async function searchProducts() {
+            // Extract query from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const query = urlParams.get('q') ? urlParams.get('q').toLowerCase() : "";
+
+            if (!query) {
+                document.getElementById('results').innerHTML = "<p>No search query provided.</p>";
+                return;
+            }
+
+            // Fetch product data
+            const products = await fetchProducts();
+
+            // Filter products based on search query
+            const filteredProducts = products.filter(product =>
+                product.name.toLowerCase().includes(query)
+            );
+
+            const resultsContainer = document.getElementById('results');
+
+            if (filteredProducts.length > 0) {
+                resultsContainer.innerHTML = filteredProducts.map(product => `
+                    <div class="product">
+                        <img src="images/${product.image}" alt="${product.name}">
+                        <div>
+                            <h3>${product.name}</h3>
+                            <p>Category: ${product.category}</p>
+                            <p>Price: ${product.price}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                resultsContainer.innerHTML = `<p>No results found for "${query}".</p>`;
+            }
+        }
+
+        // Run search on page load
+        searchProducts();
+    </script>
+</body>
+</html>
